@@ -1,22 +1,21 @@
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import {
-  FastifyAdapter,
-  type NestFastifyApplication,
-} from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter(),
-    { cors: true },
+  const app = await NestFactory.create(AppModule, { cors: true });
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidUnknownValues: false,
+      transform: true,
+    }),
   );
 
-  app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidUnknownValues: false }),
-  );
+  app.enableVersioning({
+    type: VersioningType.URI,
+  });
 
   const config = new DocumentBuilder()
     .addSecurity('bearer', {
@@ -32,7 +31,7 @@ async function bootstrap(): Promise<void> {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-  const PORT = process.env.PORT ?? 3001;
+  const PORT = process.env.PORT ?? 3000;
 
   await app.listen(PORT, '0.0.0.0');
 

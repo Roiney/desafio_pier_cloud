@@ -352,3 +352,11 @@ MigrationBackup/
 dist
 
 .env
+pgdata
+pgdata_gateway
+pgdata_store
+
+# Tests
+/coverage
+/.nyc_output
+/coverage-e2e

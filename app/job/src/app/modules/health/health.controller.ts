@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable @typescript-eslint/return-await */
 
 import { Controller, Get } from '@nestjs/common';
 import {
@@ -7,7 +6,6 @@ import {
   HealthCheckService,
   MemoryHealthIndicator,
 } from '@nestjs/terminus';
-import { PrismaOrmHealthIndicator } from './prisma.health.service';
 
 @Controller('health')
 export class HealthController {
@@ -15,7 +13,6 @@ export class HealthController {
     private readonly health: HealthCheckService,
     private readonly memory: MemoryHealthIndicator,
     private readonly disk: DiskHealthIndicator,
-    private readonly db: PrismaOrmHealthIndicator,
   ) {}
 
   /**
@@ -30,8 +27,6 @@ export class HealthController {
   async check() {
     return await this.health.check([
       // async () => await this.db.pingCheck('https://site.com/'),
-
-      async () => await this.db.pingCheck('nestjs_boilerplate'),
 
       async () => await this.memory.checkHeap('memory_heap', 150 * 1024 * 1024),
 

@@ -28,5 +28,5 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true
   },
-  "exclude": ["prisma"]
+  "exclude": ["prismaDBStrore"]
 }
