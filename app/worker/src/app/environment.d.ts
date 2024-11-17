@@ -46,4 +46,29 @@ interface AppProcessEnv {
    * @example "seller-updated-event"
    */
   BROKER_EVENT?: string;
+
+  /**
+   * Enables detailed logging across all services and components.
+   * @example "true"
+   */
+  DEBUG_ALL?: string;
+
+  /**
+   * Enables or disables background job execution.
+   * @example "true"
+   */
+  JOBS?: string;
+
+  /**
+   * Base URL for the Fetch API service.
+   * @example "https://api.example.com/v1"
+   */
+  FETCH_API?: string;
+
+  /**
+   * Base URL for the Fetch API service.
+   * Defaults to the mock API URL if not set.
+   * @example "https://api.example.com/v1"
+   */
+  API_URL_CLIENTS?: string;
 }
