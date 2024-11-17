@@ -1,5 +1,5 @@
 {
-  "name": "wl-be-gateway",
+  "name": "worker",
   "version": "0.1.0",
   "description": "",
   "author": "",
@@ -10,11 +10,11 @@
     "build": "nest build",
     "eslint:check": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "eslint:fix": "pnpm exec -- eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "lint": "yarn eslint:check && yarn prettier:check",
+    "lint": "pnpm eslint:check && pnpm prettier:check",
     "format": "prettier --write \"src/**/*.ts\"",
     "prettier:check": "prettier --check ./**/*.{ts,js,json,*rc}",
     "prettier:write": "prettier --write ./**/*.{ts,js,json,*rc}",
-    "precommit": "lint-staged &&  yarn lint",
+    "precommit": "lint-staged &&  pnpm lint",
     "commit": "cz",
     "dev": "nest start --debug --watch",
     "start": "nest start",
@@ -35,7 +35,7 @@
     "prisma:generate": "npx prisma generate",
     "prisma:studio": "npx prisma studio",
     "prisma:seed": "npx prisma db seed",
-    "postinstall": "yarn prisma generate"
+    "postinstall": "pnpm prisma generate"
   },
   "lint-staged": {
     "*.ts": [

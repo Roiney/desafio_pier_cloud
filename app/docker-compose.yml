@@ -1,17 +1,42 @@
 version: "3.9"
 services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" # Porta para conexões AMQP
+      - "15672:15672" # Porta para a interface de gerenciamento
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   job:
     build: ./job
     ports:
-      - 3002:3001 # Alterada para evitar conflito com `worker`
+      - 3000:3000
     working_dir: /app-job
     depends_on:
       worker:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "lsof", "-t", "-i:3001"]
-      timeout: 10s
+      test: ["CMD-SHELL", "nc -z localhost 3000 || exit 1"]
+      interval: 10s
+      timeout: 5s
       retries: 5
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
     networks:
       - app-network
 
@@ -21,47 +46,53 @@ services:
     ports:
       - 3001:3001
     working_dir: /app-worker
-    command: bash -c "yarn prisma db push && yarn start:dev"
     volumes:
       - ./worker/src:/app-worker/src
     depends_on:
-      db_store:
+      db:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     environment:
       - APP_PORT=3001
       - JWT_SECRET=jwt_secret
-      - DB_USER=${PG_USER_STORE}
-      - DB_PASS=${PG_PASSWORD_STORE}
-      - DB_HOST=db_store
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - DB_HOST=db
       - DB_PORT=5432
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
     healthcheck:
-      test: ["CMD", "lsof", "-t", "-i:3001"]
-      timeout: 10s
+      test: ["CMD-SHELL", "nc -z localhost 3001 || exit 1"]
+      interval: 10s
+      timeout: 5s
       retries: 5
     networks:
       - app-network
       - postgres-network
 
-  db_store:
+  db:
     image: postgres:15.0-alpine
     restart: always
+    container_name: postgres
     environment:
-      - POSTGRES_USER=${PG_USER_STORE}
-      - POSTGRES_PASSWORD=${PG_PASSWORD_STORE}
-      - POSTGRES_DB=wavelight-Cloud
-    container_name: postgres-wavelight-Cloud-store
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=pier-Cloud
+      - PGPORT=5432
     volumes:
-      - ./pgdata_store:/var/lib/postgresql/data
+      - ./pgdata:/var/lib/postgresql/data
     ports:
-      - "3005:5432"
+      - "3030:5432"
     networks:
       - postgres-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${PG_USER_STORE} -d ${PG_DATABASE} -h localhost"]
-      timeout: 10s
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pier-Cloud -h localhost"]
+      interval: 10s
+      timeout: 5s
       retries: 5
-    cap_add:
-      - SYS_NICE
 
 networks:
   app-network:

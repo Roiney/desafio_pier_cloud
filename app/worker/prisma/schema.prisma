@@ -12,9 +12,15 @@ generator erd {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL_STORE")
+  url      = env("DATABASE_URL")
 }
 
-model wlPierCloudUser {
-  id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+model wlPierCloudSeller {
+  id        Int      @id
+  name      String // Nome do vendedor
+  phone     String // Telefone do vendedor
+  createdAt DateTime @default(now()) // Data de criação do registro
+  updatedAt DateTime @updatedAt // Atualização automática ao modificar o registro
+
+  @@map("wl_pier_cloud_sellers") // Nome da tabela no banco de dados
 }
