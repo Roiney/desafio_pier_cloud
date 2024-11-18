@@ -7,6 +7,8 @@ import { FetchApiModule } from './modules/fetch-api/fetch-api.module';
 import { HealthModule } from './modules/health/health.module';
 import { MessagingReceiverModule } from './modules/messaging-receiver/messaging-receiver.module';
 import { SellerModule } from './modules/seller/seller.module';
+import { ProductsModule } from './modules/products/products.module';
+import { SalesModule } from './modules/sales/sales.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { SellerModule } from './modules/seller/seller.module';
     SellerModule,
     FetchApiModule,
     ClientsModule,
+    ProductsModule,
+    SalesModule,
   ],
 })
 export class AppModule {}
