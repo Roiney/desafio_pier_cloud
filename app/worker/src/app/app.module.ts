@@ -10,6 +10,7 @@ import { SellerModule } from './modules/seller/seller.module';
 import { ProductsModule } from './modules/products/products.module';
 import { SalesModule } from './modules/sales/sales.module';
 import { GeneralOrchestratorModule } from './modules/general-orchestrator/general-orchestrator.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { GeneralOrchestratorModule } from './modules/general-orchestrator/genera
     ProductsModule,
     SalesModule,
     GeneralOrchestratorModule,
+    ReportsModule,
   ],
 })
 export class AppModule {}

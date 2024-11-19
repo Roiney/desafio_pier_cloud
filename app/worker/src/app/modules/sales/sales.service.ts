@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { wlPierCloudSale } from '@prisma/client';
 import { dbPrismaService } from 'src/app/db/prisma/dbPrismaService.service';
 import { FetchApiService } from '../fetch-api/fetch-api.service';
-import { Sale } from './interface/sales.interface';
+import { Sale, SaleWithRelations } from './interface/sales.interface';
 
 @Injectable()
 export class SalesService {
@@ -18,6 +18,12 @@ export class SalesService {
     }
   }
 
+  /**
+   * Orchestrates the process of fetching and registering sales data.
+   *
+   * @returns {Promise<void>} A promise that resolves when the orchestration process is complete.
+   * @throws {Error} If an error occurs during the orchestration process.
+   */
   async salesOrchestrator(): Promise<void> {
     this.logger.log('Iniciando o processo de orquestração do SalesService...');
     try {
@@ -57,12 +63,34 @@ export class SalesService {
     }
   }
 
+  /**
+   * Finds a sale by its ID.
+   *
+   * @param {number} id - The ID of the sale to find.
+   * @returns {Promise<wlPierCloudSale | null>} A promise that resolves to the sale if found, or null otherwise.
+   * @throws {Error} If an error occurs during the search process.
+   */
   async findOne(id: number): Promise<wlPierCloudSale | null> {
-    return await this.prismaService.wlPierCloudSale.findUnique({
-      where: { id },
-    });
+    try {
+      return await this.prismaService.wlPierCloudSale.findUnique({
+        where: { id },
+      });
+    } catch (error: any) {
+      this.logger.error(
+        `Erro ao buscar a venda ID=${id}: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
   }
 
+  /**
+   * Registers a new sale in the database.
+   *
+   * @param {Sale} sale - The sale data to register.
+   * @returns {Promise<wlPierCloudSale>} A promise that resolves to the registered sale.
+   * @throws {Error} If the sale data is invalid or if an error occurs during the registration process.
+   */
   async registerSale(sale: Sale): Promise<wlPierCloudSale> {
     try {
       if (
@@ -76,7 +104,7 @@ export class SalesService {
         );
       }
 
-      const regissterSale = await this.prismaService.wlPierCloudSale.create({
+      const registeredSale = await this.prismaService.wlPierCloudSale.create({
         data: {
           id: Number(sale.id),
           cliente_id: Number(sale.cliente_id),
@@ -85,10 +113,34 @@ export class SalesService {
         },
       });
 
-      return regissterSale;
+      return registeredSale;
     } catch (error: any) {
       this.logger.error(
         `Erro ao registrar a venda ID=${sale.id}: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Fetches sales data from the database, including related entities: cliente, produto, and vendedor.
+   *
+   * @returns {Promise<SaleWithRelations[]>} A promise that resolves to an array of sales with related entities.
+   * @throws {Error} If an error occurs during the data fetching process.
+   */
+  async fetchSalesData(): Promise<SaleWithRelations[]> {
+    try {
+      return await this.prismaService.wlPierCloudSale.findMany({
+        include: {
+          cliente: true,
+          produto: true,
+          vendedor: true,
+        },
+      });
+    } catch (error: any) {
+      this.logger.error(
+        `Erro ao buscar dados de vendas: ${error.message}`,
         error.stack,
       );
       throw error;

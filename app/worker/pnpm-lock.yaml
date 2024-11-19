@@ -128,6 +128,9 @@ importers:
       commitizen:
         specifier: ^4.3.1
         version: 4.3.1(@types/node@20.14.9)(typescript@5.5.3)
+      csv-writer:
+        specifier: ^1.6.0
+        version: 1.6.0
       cz-conventional-changelog:
         specifier: ^3.3.0
         version: 3.3.0(@types/node@20.14.9)(typescript@5.5.3)
@@ -3349,6 +3352,9 @@ packages:
   css-what@6.1.0:
     resolution: {integrity: sha512-HTUrgRJ7r4dsZKU6GjmpfRK1O76h97Z8MfS1G0FozR+oF2kG6Vfe8JE6zwrkbxigziPHinCJ+gCPjA9EaBDtRw==}
     engines: {node: '>= 6'}
+
+  csv-writer@1.6.0:
+    resolution: {integrity: sha512-NOx7YDFWEsM/fTRAJjRpPp8t+MKRVvniAg9wQlUKx20MFrPs73WLJhFf5iteqrxNYnsy924K3Iroh3yNHeYd2g==}
 
   cytoscape-cose-bilkent@4.1.0:
     resolution: {integrity: sha512-wgQlVIUJF13Quxiv5e1gstZ08rnZj2XaLHGoFMYXz7SkNfCDOOteKBE6SYRfA9WxxI/iBc3ajfDoc6hb/MRAHQ==}
@@ -12084,6 +12090,8 @@ snapshots:
 
   css-what@6.1.0:
     optional: true
+
+  csv-writer@1.6.0: {}
 
   cytoscape-cose-bilkent@4.1.0(cytoscape@3.30.2):
     dependencies:
