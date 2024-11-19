@@ -20,9 +20,28 @@ export class JobService implements OnModuleInit {
   async onModuleInit(): Promise<void> {
     this.logger.log('Inicializando JobService...');
     try {
-      await this.jobOrchestrator();
+      // Executar etapas subsequentes em segundo plano
+      void this.startBackgroundTasks();
     } catch (error: any) {
       this.logger.error('Erro ao inicializar JobService', error.message);
+    }
+  }
+
+  /**
+   * Executa as tarefas de orquestração em segundo plano.
+   */
+  private async startBackgroundTasks(): Promise<void> {
+    this.logger.log('📂 Iniciando tarefas em segundo plano...');
+    try {
+      this.logger.log('🔄 Tentando conectar ao RabbitMQ...');
+      await this.messagingPublisherService.connectToRabbitMQ();
+      this.logger.log('🎉 Conexão inicial com RabbitMQ bem-sucedida.');
+      await this.jobOrchestrator();
+    } catch (error: any) {
+      this.logger.error(
+        `❌ Erro durante a execução das tarefas em segundo plano: ${error.message}`,
+        error.stack,
+      );
     }
   }
 

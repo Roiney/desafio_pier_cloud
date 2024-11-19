@@ -14,7 +14,7 @@ import { MessagingPublisherService } from './messaging-publisher.service';
             `amqp://${validateEnv('RABBITMQ_USERNAME', 'guest')}:${validateEnv(
               'RABBITMQ_PASSWORD',
               'guest',
-            )}@${validateEnv('RABBITMQ_HOST', 'localhost')}:${validateEnv('RABBITMQ_PORT', '5672')}`,
+            )}@${validateEnv('RABBITMQ_HOST', 'rabbitmq')}:${validateEnv('RABBITMQ_PORT', '5672')}`,
           ],
           queue: validateEnv('BROKER_QUEUE', 'default-broker-queue'),
           queueOptions: { durable: true },

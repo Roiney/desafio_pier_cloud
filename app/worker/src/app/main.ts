@@ -96,24 +96,24 @@ async function connectMicroserviceToQueue(
           durable: true,
         },
         prefetchCount,
-        deserializer: {
-          deserialize(data: any): { pattern: string; data: any } {
-            // Os dados de localização da Flespi são enviados são enviados para
-            // a sua devida fila sem informações de padrão de mensagem.
-            // Como o módulo de microsserviço do NestJS exige um padrão de
-            // mensagens no formato { pattern: string, data: any }, é necessário
-            // adicionar um padrão de mensagem para as mensagens de localização
-            // da Flespi.
-            if (queue === process.env.QUEUE_LOCATION_IN_FLESPI) {
-              return {
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                pattern: process.env.EVENT_LOCATION_IN_FLESPI!,
-                data,
-              };
-            }
-            return data;
-          },
-        },
+        // deserializer: {
+        //   deserialize(data: any): { pattern: string; data: any } {
+        //     // Os dados de localização da Flespi são enviados são enviados para
+        //     // a sua devida fila sem informações de padrão de mensagem.
+        //     // Como o módulo de microsserviço do NestJS exige um padrão de
+        //     // mensagens no formato { pattern: string, data: any }, é necessário
+        //     // adicionar um padrão de mensagem para as mensagens de localização
+        //     // da Flespi.
+        //     if (queue === process.env.QUEUE_LOCATION_IN_FLESPI) {
+        //       return {
+        //         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        //         pattern: process.env.EVENT_LOCATION_IN_FLESPI!,
+        //         data,
+        //       };
+        //     }
+        //     return data;
+        //   },
+        // },
       },
     };
     await app.connectMicroservice(options);

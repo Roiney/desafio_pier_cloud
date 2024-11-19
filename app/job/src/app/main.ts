@@ -34,8 +34,14 @@ async function bootstrap(): Promise<void> {
   const PORT = process.env.PORT ?? 3001;
 
   await app.listen(PORT, '0.0.0.0');
+  const blue = (text: string): string => `\t\x1b[36m${text}\x1b[0m`;
+  console.log(
+    `[🤖]: RabbitMQ is running on:   ${blue(`${process.env.RABBITMQ_HOST}:${process.env.RABBITMQ_PORT}`)}`,
+  );
 
-  console.log(`[🤖]: Application is running on: ${await app.getUrl()}`);
+  console.log(
+    `[🤖]: Application is running on: ${blue(`${await app.getUrl()}/${process.env.GLOBAL_PREFIX ?? ''}`)}`,
+  );
 }
 
 bootstrap().catch((e) => {

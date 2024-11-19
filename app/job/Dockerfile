@@ -25,7 +25,7 @@ RUN pnpm run build
 ENV PORT=3001 \
     RABBITMQ_USERNAME=guest \
     RABBITMQ_PASSWORD=guest \
-    RABBITMQ_HOST=localhost \
+    RABBITMQ_HOST=rabbitmq \  
     RABBITMQ_PORT=5672 \
     RABBITMQ_MANAGEMENT_PORT=15672 \
     BROKER_CLIENT=default-broker-client \

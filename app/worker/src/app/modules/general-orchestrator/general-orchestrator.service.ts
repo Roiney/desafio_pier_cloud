@@ -17,14 +17,32 @@ export class GeneralOrchestratorService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     this.logger.log('🔄 Iniciando o GeneralOrchestratorService...');
+
     try {
-      // Etapa 1: Processar clientes
+      // Etapa 1: Processar clientes (executado durante a inicialização)
       this.logger.log(
         '➡️ Chamando o método `clientsOrchestrator` do ClientsService...',
       );
       await this.clientsService.clientsOrchestrator();
       this.logger.log('✅ Método `clientsOrchestrator` concluído com sucesso.');
 
+      // Executar etapas subsequentes em segundo plano
+      void this.startBackgroundTasks();
+    } catch (error: any) {
+      this.logger.error(
+        `❌ Erro durante a execução do GeneralOrchestratorService: ${error.message}`,
+        error.stack,
+      );
+    }
+  }
+
+  /**
+   * Executa as tarefas de orquestração em segundo plano.
+   */
+  private async startBackgroundTasks(): Promise<void> {
+    this.logger.log('📂 Iniciando tarefas em segundo plano...');
+
+    try {
       // Etapa 2: Garantir registros no Seller
       this.logger.log('➡️ Verificando existência de registros no Seller...');
       await this.ensureSellersExist();
@@ -46,10 +64,12 @@ export class GeneralOrchestratorService implements OnModuleInit {
       await this.salesService.salesOrchestrator();
       this.logger.log('✅ Método `salesOrchestrator` concluído com sucesso.');
 
-      this.logger.log('🎉 GeneralOrchestratorService executado com sucesso.');
+      this.logger.log(
+        '🎉 Todas as tarefas em segundo plano concluídas com sucesso.',
+      );
     } catch (error: any) {
       this.logger.error(
-        `❌ Erro durante a execução do GeneralOrchestratorService: ${error.message}`,
+        `❌ Erro durante a execução das tarefas em segundo plano: ${error.message}`,
         error.stack,
       );
     }
@@ -60,7 +80,7 @@ export class GeneralOrchestratorService implements OnModuleInit {
    * Faz pausas de 2 segundos e tenta novamente até que haja registros.
    * Lança erro após exceder o limite de tentativas.
    */
-  private async ensureSellersExist(maxRetries = 5): Promise<void> {
+  private async ensureSellersExist(maxRetries = 50): Promise<void> {
     let retries = 0;
 
     while (retries < maxRetries) {
