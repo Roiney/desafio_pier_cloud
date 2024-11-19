@@ -1,12 +1,17 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { wlPierCloudProduct } from '@prisma/client';
+import { dbPrismaService } from 'src/app/db/prisma/dbPrismaService.service';
 import { FetchApiService } from '../fetch-api/fetch-api.service';
 import { Product } from './interface/product.interface';
 
 @Injectable()
-export class ProductsService implements OnModuleInit {
+export class ProductsService {
   private readonly logger = new Logger(ProductsService.name);
 
-  constructor(private readonly fetchApiService: FetchApiService) {
+  constructor(
+    private readonly fetchApiService: FetchApiService,
+    private readonly prismaService: dbPrismaService,
+  ) {
     // Configura os níveis de log dependendo das variáveis de ambiente
     if (!process.env.DEBUG_ALL && !process.env.JOBS) {
       Logger.overrideLogger(['log', 'warn', 'error']);
@@ -14,53 +19,103 @@ export class ProductsService implements OnModuleInit {
   }
 
   /**
-   * Método executado na inicialização do módulo.
+   * Orquestra o processo de busca e processamento dos produtos.
    */
-  async onModuleInit(): Promise<void> {
-    this.logger.log('Inicializando ProductsService...');
+  async productsOrchestrator(): Promise<void> {
+    this.logger.log('Iniciando a orquestração de produtos...');
     try {
-      await this.productsOrchestrator();
+      const products: Product[] = await this.fetchApiService.fetchProducts();
+
+      if (!products.length) {
+        this.logger.warn('Nenhum produto encontrado na API.');
+        return;
+      }
+
+      this.logger.log(`Total de produtos encontrados: ${products.length}.`);
+
+      for (const product of products) {
+        this.logger.log(
+          `Processando produto: ID=${product.id}, Nome="${product.nome}", Tipo="${product.tipo}", Preço=${product.preco}.`,
+        );
+
+        const existingProduct = await this.findProductById(Number(product.id));
+        if (existingProduct) {
+          this.logger.log(
+            `Produto com ID=${product.id} já está registrado no banco de dados.`,
+          );
+          continue;
+        }
+
+        await this.createProduct(product);
+        this.logger.log(`Produto com ID=${product.id} registrado com sucesso.`);
+      }
+
+      this.logger.log('Orquestração de produtos concluída com sucesso.');
     } catch (error: any) {
       this.logger.error(
-        `Erro ao inicializar ProductsService: ${error.message}`,
+        `Erro durante a orquestração de produtos: ${error.message}`,
         error.stack,
       );
     }
   }
 
   /**
-   * Orquestra o processo de busca e processamento dos produtos.
+   * Busca um produto pelo ID no banco de dados.
+   * @param id ID do produto
+   * @returns Produto encontrado ou null
    */
-  async productsOrchestrator(): Promise<void> {
-    this.logger.log(
-      'Iniciando o processo de orquestração do ProductsService...',
-    );
+  async findProductById(id: number): Promise<wlPierCloudProduct | null> {
     try {
-      const products: Product[] = await this.fetchApiService.fetchProducts();
-
-      if (!products.length) {
-        this.logger.warn('Nenhum produto foi encontrado na API.');
-        return;
-      }
-
-      this.logger.log(`Foram encontrados ${products.length} produtos.`);
-
-      for (const product of products) {
-        this.logger.log(
-          `Processando produto: ID=${product.id}, Nome=${product.nome}, Tipo=${product.tipo}, Preço=${product.preco}`,
-        );
-
-        // Adicione aqui a lógica para processar cada produto
-      }
-
-      this.logger.log(
-        'Processo de orquestração de produtos concluído com sucesso.',
-      );
+      return await this.prismaService.wlPierCloudProduct.findUnique({
+        where: { id },
+      });
     } catch (error: any) {
       this.logger.error(
-        `Erro durante a orquestração do ProductsService: ${error.message}`,
+        `Erro ao buscar produto com ID=${id}: ${error.message}`,
         error.stack,
       );
+      throw error;
+    }
+  }
+
+  /**
+   * Registra um novo produto no banco de dados.
+   * @param product Objeto do produto
+   * @returns Produto registrado
+   */
+  async createProduct(product: Product): Promise<wlPierCloudProduct> {
+    try {
+      if (
+        !product.id ||
+        !product.nome ||
+        !product.preco ||
+        !product.sku ||
+        !product.tipo ||
+        !product.vendedor_id
+      ) {
+        throw new Error(
+          `Dados inválidos para o produto: ${JSON.stringify(product)}`,
+        );
+      }
+
+      const newProduct = await this.prismaService.wlPierCloudProduct.create({
+        data: {
+          id: Number(product.id),
+          nome: product.nome,
+          tipo: product.tipo,
+          preco: product.preco, // Assumindo que "preco" já foi validado como um Decimal
+          sku: product.sku,
+          vendedor_id: Number(product.vendedor_id),
+        },
+      });
+
+      return newProduct;
+    } catch (error: any) {
+      this.logger.error(
+        `Erro ao registrar produto ID=${product.id}: ${error.message}`,
+        error.stack,
+      );
+      throw error;
     }
   }
 }

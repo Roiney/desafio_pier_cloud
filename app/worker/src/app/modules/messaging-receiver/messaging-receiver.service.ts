@@ -31,6 +31,12 @@ export class MessagingReceiverService {
 
       const { id, name, phone } = message.data;
 
+      const thisSellerExistInDB = await this.sellerService.findOne(Number(id));
+
+      if (thisSellerExistInDB) {
+        this.logger.log(`Vendedor de id ${id} já possui registro em banco }`);
+        return;
+      }
       // Lógica para registrar o vendedor (exemplo fictício)
       const result = await this.sellerService.registerSeller(
         Number(id),

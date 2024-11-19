@@ -1,20 +1,39 @@
-# Use uma imagem base para Node.js
-FROM node:18-alpine
+FROM node:18-bullseye
+
+# Instalar o nc
+RUN apt-get update && apt-get install -y netcat
+
+# Install pnpm with corepack
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Configure o diretório de trabalho dentro do container
 WORKDIR /app-job
 
-# Copie os arquivos necessários para o container
-COPY package*.json ./
+# Copiar os arquivos necessários
+COPY package.json pnpm-lock.yaml ./
 
-# Instale as dependências
-RUN npm install
+# Instalar TODAS as dependências (produção e desenvolvimento)
+RUN pnpm install
 
-# Copie o restante dos arquivos do projeto
+# Bundle app source
 COPY . .
+
+# Creates a "dist" folder with the production build
+RUN pnpm run build
+
+# Definir as variáveis de ambiente
+ENV PORT=3001 \
+    RABBITMQ_USERNAME=guest \
+    RABBITMQ_PASSWORD=guest \
+    RABBITMQ_HOST=localhost \
+    RABBITMQ_PORT=5672 \
+    RABBITMQ_MANAGEMENT_PORT=15672 \
+    BROKER_CLIENT=default-broker-client \
+    BROKER_QUEUE=default-broker-queue \
+    BROKER_EVENT=default-broker-event
 
 # Exponha a porta usada pela aplicação
 EXPOSE 3001
 
-# Comando para iniciar a aplicação
-CMD ["npm", "start"]
+# Start the server using the production build
+CMD ["pnpm", "run", "start:dev"]

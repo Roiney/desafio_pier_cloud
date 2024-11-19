@@ -9,6 +9,7 @@ import { MessagingReceiverModule } from './modules/messaging-receiver/messaging-
 import { SellerModule } from './modules/seller/seller.module';
 import { ProductsModule } from './modules/products/products.module';
 import { SalesModule } from './modules/sales/sales.module';
+import { GeneralOrchestratorModule } from './modules/general-orchestrator/general-orchestrator.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SalesModule } from './modules/sales/sales.module';
     ClientsModule,
     ProductsModule,
     SalesModule,
+    GeneralOrchestratorModule,
   ],
 })
 export class AppModule {}
