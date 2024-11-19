@@ -4,18 +4,20 @@ services:
     image: rabbitmq:3-management
     container_name: rabbitmq
     ports:
-      - "5672:5672" # Porta para conexões AMQP
-      - "15672:15672" # Porta para a interface de gerenciamento
+      - "5672:5672"
+      - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "rabbitmq-diagnostics ping"]
+      test: ["CMD-SHELL", "rabbitmqctl await_startup"]
       interval: 10s
-      timeout: 5s
+      timeout: 10s
       retries: 5
+    restart: always
+
 
   db:
     image: postgres:15.0-alpine
@@ -50,7 +52,7 @@ services:
       test: ["CMD-SHELL", "nc -z localhost 3001 || exit 1"] # Verifica a porta 3001
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 15
     environment:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672

@@ -39,7 +39,7 @@ export class MessagingPublisherService {
   async connectToRabbitMQ(): Promise<void> {
     const maxRetries = 500;
     let retries = 0;
-
+    await this.waitForRabbitMQ(10000);
     while (retries < maxRetries) {
       try {
         await this.brokerClient.connect();
@@ -57,6 +57,13 @@ export class MessagingPublisherService {
     throw new Error(
       '❌ Não foi possível conectar ao RabbitMQ após várias tentativas.',
     );
+  }
+
+  private async waitForRabbitMQ(delayMs: number): Promise<void> {
+    this.logger.log(
+      `⏳ Aguardando ${delayMs / 1000}s antes de tentar conectar ao RabbitMQ...`,
+    );
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
   }
 
   /**
