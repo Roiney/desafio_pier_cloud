@@ -1,18 +1,18 @@
 import { INestApplication, Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { StoreDBPrismaService } from './dbPrismaService.service';
+import { dbPrismaService } from './dbPrismaService.service';
 
 describe('StoreDBPrismaService', () => {
-  let service: StoreDBPrismaService;
+  let service: dbPrismaService;
   let mockApp: INestApplication;
   let loggerSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [StoreDBPrismaService],
+      providers: [dbPrismaService],
     }).compile();
 
-    service = module.get<StoreDBPrismaService>(StoreDBPrismaService);
+    service = module.get<dbPrismaService>(dbPrismaService);
     mockApp = { close: jest.fn() } as unknown as INestApplication;
     loggerSpy = jest.spyOn(Logger.prototype, 'log');
   });
