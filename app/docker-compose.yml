@@ -89,6 +89,7 @@ services:
       - RABBITMQ_PASSWORD=guest
     command: >
       sh -c "pnpm prisma migrate deploy &&
+          pnpm test -- --runInBand &&
           pnpm run start"
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost 3000 || exit 1"]
