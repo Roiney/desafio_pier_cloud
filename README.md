@@ -284,7 +284,7 @@ Os relatórios de vendas consolidados gerados pelo sistema estão no formato CSV
 Este formato garante que os dados sejam organizados, legíveis e prontos para análise em ferramentas como Microsoft Excel, Google Sheets ou sistemas de BI.
 
 <br>
-# **Considerações Finais**
+## **Considerações Finais**
 
 Esta aplicação foi projetada com foco em:
 
