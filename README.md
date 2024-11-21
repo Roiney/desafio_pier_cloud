@@ -135,8 +135,6 @@ Este projeto utiliza o **Docker Compose** para configurar, construir e orquestra
 #### Serviços:
 
 1. **RabbitMQ**:
-<br>
-
     * Usa a imagem oficial `rabbitmq:3-management`.
     * Exposição de portas:
         * `5672`: Porta para conexões AMQP (protocolo de mensagens).
@@ -144,8 +142,6 @@ Este projeto utiliza o **Docker Compose** para configurar, construir e orquestra
     * Configuração de credenciais padrão (`guest`/`guest`).
     * Testa a saúde com o comando `rabbitmq-diagnostics ping`.
 2. **PostgreSQL**:
-<br>
-
     * Usa a imagem `postgres:15.0-alpine`.
     * Exposição da porta `3030` (internamente mapeada para `5432` no contêiner).
     * Configuração padrão:
@@ -154,14 +150,10 @@ Este projeto utiliza o **Docker Compose** para configurar, construir e orquestra
         * Banco de dados: `pier-Cloud`.
     * Verificação de saúde com o comando `pg_isready`.
 3. **Job**:
-<br>
-
     * Consome dados da API de vendedores e publica mensagens no RabbitMQ.
     * Configura as credenciais do RabbitMQ via variáveis de ambiente.
     * Saúde monitorada com o comando `nc -z localhost 3001`.
 4. **Worker**:
-<br>
-
     * Processa as mensagens recebidas do RabbitMQ, consulta APIs de vendas, produtos e clientes, e armazena as informações processadas no PostgreSQL.
     * Conexão com RabbitMQ e PostgreSQL.
     * Saúde monitorada com o comando `nc -z localhost 3000`.
@@ -176,24 +168,19 @@ Este projeto utiliza o **Docker Compose** para configurar, construir e orquestra
 ### Como Executar
 
 1. **Acesse o diretório do projeto**:
+
 <br>
 ```
-bash
-Copiar código
  app
 ```
 
 2. **Execute o Docker Compose**:
-<br>
+
 ```
-bash
-Copiar código
 docker compose up -d --build
 ```
 
 3. **O que acontece?**
-<br>
-
     * **Etapa 1**: Criação das redes `app-network` e `postgres-network`.
     * **Etapa 2**: Inicialização dos serviços:
         * **RabbitMQ**:
@@ -211,8 +198,6 @@ docker compose up -d --build
 Para monitorar os logs de execução, utilize:
 
 ```
-bash
-Copiar código
 docker compose logs -f
 ```
 
@@ -238,22 +223,82 @@ Os serviços são configurados com verificações de saúde para garantir que o 
 Após a inicialização:
 <br>
 1. **Acesse a interface de gerenciamento do RabbitMQ**:
-<br>
-
     * URL: http://localhost:15672.
     * Credenciais padrão: `guest` / `guest`.
 2. **Confirme que os dados foram processados**:
-<br>
-
     * Verifique se o PostgreSQL contém os registros processados.
     * Utilize ferramentas como `pgAdmin` ou execute consultas diretamente no banco.
 3. :
 Para desligar todos os contêineres:
 
 ```
-bash
-Copiar código
 docker compose down
 ```
 
 Agora, sua aplicação está configurada e pronta para uso. 🚀
+
+### **Busca de Relatório**
+
+A API para buscar os relatórios consolidados está disponível no endpoint:
+
+Este endpoint retorna os relatórios de vendas consolidados para todos os vendedores cadastrados.
+<br>
+```
+GET /reports HTTP/1.1Host: localhost:3000
+```
+
+> **Nota:** Caso a URL não esteja acessível imediatamente após a inicialização, aguarde alguns segundos. O docker-compose está realizando processos importantes, como:
+
+1. Aplicação das migrações do **Prisma** no banco de dados.
+2. Execução de testes unitários para garantir a integridade do serviço.
+3. Inicialização completa do serviço **Worker**, que é responsável por processar os dados e disponibilizar os relatórios.
+
+Após a conclusão desses processos, o serviço estará disponível e o endpoint poderá ser acessado normalmente.
+
+### **Estrutura do Relatório CSV**
+
+Os relatórios de vendas consolidados gerados pelo sistema estão no formato CSV e incluem informações detalhadas sobre vendedores, clientes e produtos vendidos. Cada linha do arquivo CSV representa uma venda específica, contendo os seguintes campos:
+
+| Campo | Descrição |
+| ----- | --------- |
+| **ID do Vendedor** | Identificador único do vendedor. |
+| **Nome do Vendedor** | Nome completo do vendedor. |
+| **Telefone do Vendedor** | Número de telefone do vendedor. |
+| **ID do Cliente** | Identificador único do cliente. |
+| **Nome do Cliente** | Nome completo do cliente. |
+| **Telefone do Cliente** | Número de telefone do cliente. |
+| **Email do Cliente** | Endereço de email do cliente. |
+| **ID do Produto** | Identificador único do produto. |
+| **Nome do Produto** | Nome do produto vendido. |
+| **Preço do Produto** | Preço unitário do produto (em moeda local). |
+| **SKU do Produto** | Código SKU (Stock Keeping Unit) do produto. |
+
+#### **Notas Importantes**
+
+1. Cada arquivo CSV é gerado por **vendedor**, consolidando todas as vendas atribuídas a ele.
+2. A estrutura facilita a análise das vendas, tanto por vendedor quanto por cliente e produto.
+3. Campos como **Telefone do Cliente** e **Email do Cliente** ajudam na comunicação direta com os compradores, caso necessário.
+
+- - -
+
+Este formato garante que os dados sejam organizados, legíveis e prontos para análise em ferramentas como Microsoft Excel, Google Sheets ou sistemas de BI.
+
+<br>
+# **Considerações Finais**
+
+Esta aplicação foi projetada com foco em:
+
+* **Modularidade:** Microserviços com responsabilidades bem definidas.
+* **Escalabilidade:** Uso de mensageria e Docker para facilitar o crescimento horizontal.
+* **Confiabilidade:** Healthchecks para monitorar a saúde dos serviços.
+* **Facilidade de implantação:** Docker Compose para orquestrar todos os serviços.
+
+## **Sobre o Código**
+
+Este projeto foi desenvolvido com o objetivo de avaliar habilidades técnicas, por isso:
+
+* **Presença de code smells:** Algumas escolhas no código, como exceções de logs e comentários extensivos, foram propositalmente mantidas para evidenciar decisões de design e raciocínio técnico.
+* **Desacoplamento:** Foi aplicada a inversão de dependências para melhorar a modularidade e facilitar a manutenção do código.
+* **Aderência ao framework:** Não foi implementada uma camada de desacoplamento do framework utilizado, já que o foco do projeto é a análise técnica e não a produção final.
+
+Agora é sua vez de experimentar e explorar o projeto!
